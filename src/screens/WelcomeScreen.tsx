@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   StatusBar,
   useWindowDimensions,
-  Platform,
+  SafeAreaView,
 } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient'
 
@@ -17,30 +17,24 @@ import LinearGradient from 'react-native-linear-gradient'
 // RESPONSIVE UTILITIES
 // ============================================================================
 
-/**
- * Calculate responsive dimensions based on screen size
- */
 const screenWidth = Dimensions.get('window').width
-const screenHeight = Dimensions.get('window').height
 const isSmallDevice = screenWidth < 375
 const isTablet = screenWidth >= 768
 
-/**
- * Responsive scaling function
- * Scales values proportionally based on screen width
- */
 const responsiveScale = (baseValue: number): number => {
   const scale = screenWidth / 375 // Base scale at iPhone 8 width
   return Math.round(baseValue * scale)
 }
 
+// Each slide owns its own accent gradient for a distinct, story-like feel
 const slides = [
   {
     id: '1',
     image: require('../assets/images/logo.png'),
-    title: 'Welcome to\nthe ItalianGo Dictionary',
+    title: 'Welcome to\nItalianGo Dictionary',
     description:
       "Learn Italian with Confidence - Your Ultimate Language Companion.",
+    colors: ['#f1f3f7', '#ffffff'],
   },
   {
     id: '2',
@@ -48,13 +42,15 @@ const slides = [
     title: 'Learn Italian\nwith Confidence',
     description:
       "Practice words, meanings and pronunciation step by step.",
+    colors: ['#f1f3f7', '#ffffff'],
   },
   {
     id: '3',
     image: require('../assets/images/slideThree.png'),
-    title: 'Improve Every Day',
+    title: 'Improve\nEvery Day',
     description:
       "Build your vocabulary with smart lessons and repetition.",
+    colors: ['#f1f3f7', '#ffffff'],
   },
 ]
 
@@ -66,60 +62,111 @@ const WelcomeSlider = ({ onGetStart }: Props) => {
   const { width: deviceWidth } = useWindowDimensions()
   const [currentIndex, setCurrentIndex] = useState(0)
   const flatListRef = useRef<FlatList>(null)
+  const isLastSlide = currentIndex === slides.length - 1
+  const activeColors = slides[currentIndex].colors
 
   const onScrollEnd = (e: any) => {
     const index = Math.round(e.nativeEvent.contentOffset.x / deviceWidth)
     setCurrentIndex(index)
   }
 
+  const handlePrimaryPress = () => {
+    if (isLastSlide) {
+      onGetStart?.()
+      return
+    }
+    flatListRef.current?.scrollToIndex({ index: currentIndex + 1, animated: true })
+  }
+
   return (
-    <LinearGradient colors={['#FFF6E5', '#E3F2FD']} style={styles.container}>
-      <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
+    <LinearGradient colors={activeColors} style={styles.container}>
+      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
 
-      <FlatList
-        ref={flatListRef}
-        data={slides}
-        keyExtractor={(item) => item.id}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        scrollEventThrottle={16}
-        onMomentumScrollEnd={onScrollEnd}
-        renderItem={({ item }) => (
-          <View style={[styles.slide, { width: deviceWidth }]}>
-            <Image source={item.image} style={styles.image} resizeMode="contain" />
-            <Text style={styles.title}>{item.title}</Text>
-            <Text style={styles.description}>{item.description}</Text>
+      <SafeAreaView style={styles.safeArea}>
+        {/* Story-style progress segments */}
+        <View style={styles.progressRow}>
+          {slides.map((_, index) => (
+            <View key={index} style={styles.progressTrack}>
+              <View
+                style={[
+                  styles.progressFill,
+                  { width: index <= currentIndex ? '100%' : '0%' },
+                ]}
+              />
+            </View>
+          ))}
+        </View>
+
+        <View style={styles.topBar}>
+          <Text style={styles.brandText}>Italy Go</Text>
+          {!isLastSlide && (
+            <TouchableOpacity
+              onPress={() => onGetStart?.()}
+              activeOpacity={0.7}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <Text style={styles.skipText}>Skip</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        <FlatList
+          ref={flatListRef}
+          data={slides}
+          keyExtractor={(item) => item.id}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          scrollEventThrottle={16}
+          onMomentumScrollEnd={onScrollEnd}
+          style={styles.flatList}
+          renderItem={({ item }) => (
+            <View style={[styles.heroZone, { width: deviceWidth }]}>
+              <Image source={item.image} style={styles.image} resizeMode="contain" />
+            </View>
+          )}
+        />
+
+        {/* Floating bottom sheet */}
+        <View style={styles.sheet}>
+          <Text style={styles.title}>{slides[currentIndex].title}</Text>
+          <Text style={styles.description}>{slides[currentIndex].description}</Text>
+
+          <View style={styles.sheetFooter}>
+            <View style={styles.dotsRow}>
+              {slides.map((_, index) => (
+                <View
+                  key={index}
+                  style={[
+                    styles.dot,
+                    currentIndex === index && [
+                      styles.activeDot,
+                    ],
+                  ]}
+                />
+              ))}
+            </View>
+
+            {isLastSlide ? (
+              <TouchableOpacity
+                style={[styles.getStartedPill]}
+                onPress={handlePrimaryPress}
+                activeOpacity={0.9}
+              >
+                <Text style={styles.getStartedText}>Get Started</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                style={[styles.nextCircle]}
+                onPress={handlePrimaryPress}
+                activeOpacity={0.9}
+              >
+                <Text style={styles.nextArrow}>→</Text>
+              </TouchableOpacity>
+            )}
           </View>
-        )}
-      />
-
-      {/* Pagination */}
-      <View style={styles.pagination}>
-        {slides.map((_, index) => (
-          <View
-            key={index}
-            style={[
-              styles.dot,
-              currentIndex === index && styles.activeDot,
-            ]}
-          />
-        ))}
-      </View>
-
-      {/* Button */}
-      <TouchableOpacity
-        style={styles.button}
-        onPress={onGetStart}
-        activeOpacity={0.9}
-      >
-        <LinearGradient
-          colors={['#1565C0', '#42A5F5']}
-          style={styles.buttonGradient}
-        >
-          <Text style={styles.buttonText}>Get Start</Text>
-        </LinearGradient>
-      </TouchableOpacity>
+        </View>
+      </SafeAreaView>
     </LinearGradient>
   )
 }
@@ -131,21 +178,11 @@ export default WelcomeSlider
 // ============================================================================
 
 const getResponsiveStyles = () => {
-  const imgSize = isTablet ? 300 : isSmallDevice ? 140 : 180
-  const titleSize = isTablet ? 32 : isSmallDevice ? 20 : 24
+  const imgSize = isTablet ? 280 : isSmallDevice ? 250 : 290
+  const titleSize = isTablet ? 30 : isSmallDevice ? 20 : 23
   const descSize = isTablet ? 16 : isSmallDevice ? 13 : 14
-  const paddingTop = isTablet ? 80 : isSmallDevice ? 50 : 100
-  const marginBottom = responsiveScale(30)
-  const buttonHeight = responsiveScale(50)
 
-  return {
-    imgSize,
-    titleSize,
-    descSize,
-    paddingTop,
-    marginBottom,
-    buttonHeight,
-  }
+  return { imgSize, titleSize, descSize }
 }
 
 const responsiveStyles = getResponsiveStyles()
@@ -154,67 +191,131 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  slide: {
+  safeArea: {
+    flex: 1,
+  },
+  progressRow: {
+    flexDirection: 'row',
+    paddingHorizontal: responsiveScale(20),
+    marginTop: responsiveScale(60),
+    gap: responsiveScale(6),
+  },
+  progressTrack: {
+    flex: 1,
+    height: responsiveScale(4),
+    borderRadius: responsiveScale(2),
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#1565C0',
+    borderRadius: responsiveScale(2),
+  },
+  topBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: responsiveStyles.paddingTop,
-    paddingHorizontal: responsiveScale(15),
-    justifyContent: 'flex-start',
+    paddingHorizontal: responsiveScale(20),
+    paddingTop: responsiveScale(14),
+  },
+  brandText: {
+    fontSize: responsiveScale(14),
+    fontWeight: '700',
+    color: '#f1f3f7',
+  },
+  skipText: {
+    fontSize: responsiveScale(14),
+    fontWeight: '600',
+    color: '#1565C0',
+  },
+  flatList: {
+    flex: 1,
+  },
+  heroZone: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   image: {
     width: responsiveStyles.imgSize,
     height: responsiveStyles.imgSize,
-    marginBottom: responsiveStyles.marginBottom,
+  },
+  sheet: {
+    backgroundColor: '#fefeff',
+    borderTopLeftRadius: responsiveScale(32),
+    borderTopRightRadius: responsiveScale(32),
+    paddingTop: responsiveScale(28),
+    paddingHorizontal: responsiveScale(24),
+    paddingBottom: responsiveScale(24),
   },
   title: {
     fontSize: responsiveStyles.titleSize,
-    color: '#2986F5',
+    color: 'rgba(8, 38, 121, 0.85)',
     fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: responsiveScale(16),
     lineHeight: responsiveStyles.titleSize * 1.3,
+    marginBottom: responsiveScale(10),
   },
   description: {
     fontSize: responsiveStyles.descSize,
-    color: '#222',
-    textAlign: 'center',
-    marginHorizontal: responsiveScale(20),
-    marginBottom: responsiveScale(32),
+    color: '#46505f',
     lineHeight: responsiveStyles.descSize * 1.5,
+    marginBottom: responsiveScale(22),
   },
-  pagination: {
+  sheetFooter: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: responsiveScale(30),
-    paddingHorizontal: responsiveScale(15),
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  dotsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   dot: {
-    width: responsiveScale(24),
-    height: responsiveScale(6),
-    borderRadius: responsiveScale(3),
-    backgroundColor: '#E0E0E0',
-    marginHorizontal: responsiveScale(4),
+    width: responsiveScale(8),
+    height: responsiveScale(8),
+    borderRadius: responsiveScale(4),
+    backgroundColor: '#a5aab1',
+    marginRight: responsiveScale(6),
   },
   activeDot: {
-    backgroundColor: '#111',
+    width: responsiveScale(20),
+    backgroundColor: '#1565C0',
   },
-  button: {
-    width: '85%',
-    alignSelf: 'center',
-    borderRadius: responsiveScale(24),
-    overflow: 'hidden',
-    marginVertical: responsiveScale(30),
-  },
-  buttonGradient: {
-    paddingVertical: responsiveScale(14),
-    paddingHorizontal: responsiveScale(20),
+  nextCircle: {
+    width: responsiveScale(56),
+    height: responsiveScale(56),
+    borderRadius: responsiveScale(28),
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: responsiveStyles.buttonHeight,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 4,
+    backgroundColor: '#1565C0',
   },
-  buttonText: {
+  nextArrow: {
     color: '#fff',
-    fontSize: responsiveScale(18),
+    fontSize: responsiveScale(25),
     fontWeight: 'bold',
-    letterSpacing: 1,
+    marginTop: -8,
+  },
+  getStartedPill: {
+    paddingVertical: responsiveScale(14),
+    paddingHorizontal: responsiveScale(28),
+    borderRadius: responsiveScale(28),
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 4,
+    backgroundColor: '#1565C0',
+  },
+  getStartedText: {
+    color: '#fff',
+    fontSize: responsiveScale(16),
+    fontWeight: 'bold',
+    letterSpacing: 0.5,
+    marginTop: -2,
   },
 })

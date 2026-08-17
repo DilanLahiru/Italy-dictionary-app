@@ -135,9 +135,10 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.EXTRA_LARGE,
     color: COLORS.primary,
     fontWeight: FONT_WEIGHTS.BOLD,
+    marginTop: 10,
   },
   content: {
-    paddingHorizontal: SPACING.LARGE,
+    paddingHorizontal: SPACING.EXTRA_LARGE,
     paddingBottom: SPACING.XXXL,
   },
   paragraph: {

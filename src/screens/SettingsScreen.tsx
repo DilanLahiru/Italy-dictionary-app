@@ -3,7 +3,7 @@
  * Displays application settings and user options
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   SafeAreaView,
   View,
@@ -14,6 +14,7 @@ import {
   Image,
   ImageSourcePropType,
 } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLORS } from '../constants/colors';
 import { SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../constants/dimensions';
@@ -56,11 +57,14 @@ interface SettingItem {
   icon: ImageSourcePropType;
   onPress: () => void;
   version?: string;
+  badgeColor: string;
 }
 
-const HomePng = require('../assets/images/home.png');
 const FavoritePng = require('../assets/images/favorite.png');
-const SettingsPng = require('../assets/images/setting.png');
+const AccountPng = require('../assets/images/account.png');
+const NotificationPng = require('../assets/images/notification.png');
+const DictionaryPng = require('../assets/images/dictionary.png');
+const BookPng = require('../assets/images/book.png');
 
 /**
  * SettingsScreen Component
@@ -89,6 +93,26 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
 }) => {
   const [notificationVisible, setNotificationVisible] = useState(false);
   const [activeTab, setActiveTab] = useState('settings');
+  const [userName, setUserName] = useState('Guest User');
+  const [userEmail, setUserEmail] = useState('');
+
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        const userData = await AsyncStorage.getItem('userData');
+        if (userData) {
+          const user = JSON.parse(userData);
+          setUserName(user?.username || user?.name || 'Guest User');
+          setUserEmail(user?.email || '');
+        }
+      } catch (error) {
+        console.error('Error loading user data:', error);
+      }
+    };
+    loadUserData();
+  }, []);
+
+  const userInitial = userName.trim().charAt(0)?.toUpperCase() || 'U';
 
   /**
    * Open notifications modal
@@ -159,66 +183,62 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
   }, [onLogout]);
 
   /**
-   * Settings menu items
+   * Settings menu grouped into sections
    */
-  const settingsItems: SettingItem[] = [
-    {
-      id: 'profile',
-      label: 'User Profile',
-      icon: FavoritePng,
-      onPress: handleOpenProfile,
-    },
+  const accountItems: SettingItem[] = [
     {
       id: 'notifications',
       label: 'Notification',
-      icon: SettingsPng,
+      icon: NotificationPng,
+      badgeColor: '#FFF3E0',
       onPress: handleOpenNotifications,
     },
+  ];
+
+  const aboutItems: SettingItem[] = [
     {
       id: 'app-version',
       label: 'App Version',
-      icon: SettingsPng,
-      onPress: () => {
-        onOpenAppVersion?.();
-      },
+      icon: DictionaryPng,
+      badgeColor: '#E8F5E9',
+      onPress: () => onOpenAppVersion?.(),
     },
     {
       id: 'privacy',
       label: 'Privacy Policy',
-      icon: SettingsPng,
-      onPress: () => {
-        onOpenPrivacy?.();
-      },
+      icon: BookPng,
+      badgeColor: '#F3E5F5',
+      onPress: () => onOpenPrivacy?.(),
     },
     {
       id: 'terms',
       label: 'Terms & Conditions',
-      icon: SettingsPng,
-      onPress: () => {
-        onOpenTerms?.();
-      },
+      icon: BookPng,
+      badgeColor: '#FCE4EC',
+      onPress: () => onOpenTerms?.(),
     },
     {
       id: 'help',
       label: 'Help & Support',
-      icon: SettingsPng,
-      onPress: () => {
-        onOpenSupport?.();
-      },
+      icon: FavoritePng,
+      badgeColor: '#E0F7FA',
+      onPress: () => onOpenSupport?.(),
     },
   ];
 
   /**
    * Render a settings menu item
    */
-  const renderSettingItem = (item: SettingItem) => (
+  const renderSettingItem = (item: SettingItem, isLast: boolean) => (
     <TouchableOpacity
       key={item.id}
-      style={styles.settingRow}
+      style={[styles.settingRow, isLast && styles.settingRowLast]}
       activeOpacity={0.7}
       onPress={item.onPress}
     >
-      <Image source={item.icon} style={styles.settingIcon} />
+      <View style={[styles.iconBadge, {backgroundColor: item.badgeColor}]}>
+        <Image source={item.icon} style={styles.settingIcon} />
+      </View>
       <View style={styles.settingContent}>
         <Text style={styles.settingText}>{item.label}</Text>
         {item.version && <Text style={styles.versionText}>{item.version}</Text>}
@@ -227,13 +247,23 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
     </TouchableOpacity>
   );
 
+  const renderSection = (title: string, items: SettingItem[]) => (
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>{title}</Text>
+      <View style={styles.sectionCard}>
+        {items.map((item, index) => renderSettingItem(item, index === items.length - 1))}
+      </View>
+    </View>
+  );
+
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
+      <LinearGradient
+        colors={['#1565C0', '#1D5FE5']}
+        start={{x: 0, y: 0}}
+        end={{x: 1, y: 1}}
+        style={styles.headerGradient}
       >
-        {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity
             onPress={handleBackPress}
@@ -246,16 +276,44 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
           <View style={styles.headerSpacer} />
         </View>
 
-        {/* Settings Items */}
-        {settingsItems.map(item => renderSettingItem(item))}
+        <View style={styles.profileCard}>
+          <View style={styles.avatarCircle}>
+            <Text style={styles.avatarInitial}>{userInitial}</Text>
+          </View>
+          <View style={styles.profileInfo}>
+            <Text style={styles.profileName} numberOfLines={1}>{userName}</Text>
+            {!!userEmail && (
+              <Text style={styles.profileEmail} numberOfLines={1}>{userEmail}</Text>
+            )}
+          </View>
+          <TouchableOpacity
+            style={styles.editProfileButton}
+            activeOpacity={0.7}
+            onPress={handleOpenProfile}
+          >
+            <Text style={styles.editProfileText}>Edit</Text>
+          </TouchableOpacity>
+        </View>
+      </LinearGradient>
+
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {renderSection('Account', accountItems)}
+        {renderSection('About & Support', aboutItems)}
 
         {/* Logout Button */}
         <TouchableOpacity
           style={styles.logoutButton}
-          activeOpacity={0.8}
+          activeOpacity={0.85}
           onPress={handleLogout}
         >
+          <View style={styles.logoutIconBadge}>
+            <Text style={styles.logoutIcon}>⎋</Text>
+          </View>
           <Text style={styles.logoutText}>Log Out</Text>
+          <Text style={styles.logoutChevron}>›</Text>
         </TouchableOpacity>
       </ScrollView>
 
@@ -285,9 +343,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.backgroundLight,
   },
+  headerGradient: {
+    paddingBottom: SPACING.XXL,
+    borderBottomLeftRadius: BORDER_RADIUS.LARGE,
+    borderBottomRightRadius: BORDER_RADIUS.LARGE,
+  },
   scrollContent: {
     paddingHorizontal: SPACING.LARGE,
-    paddingTop: SPACING.MEDIUM,
+    paddingTop: SPACING.LARGE,
     paddingBottom: SPACING.XXXL,
   },
   header: {
@@ -296,41 +359,118 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: SPACING.MEDIUM,
     paddingVertical: SPACING.MEDIUM,
-    marginBottom: SPACING.LARGE,
   },
   backButton: {
-    width: 36,
-    height: 36,
+    width: 45,
+    height: 45,
     justifyContent: 'center',
     alignItems: 'center',
+    //backgroundColor: 'rgba(255,255,255,0.16)',
   },
   backText: {
-    fontSize: FONT_SIZES.XXL,
-    color: COLORS.primary,
+    fontSize: 45,
+    color: COLORS.backgroundWhite,
     fontWeight: FONT_WEIGHTS.BOLD,
+    // alignItems: 'center',
+    // justifyContent: 'center',
+    marginTop: -8,
   },
   headerTitle: {
     fontSize: FONT_SIZES.EXTRA_LARGE,
-    color: COLORS.primary,
+    color: COLORS.backgroundWhite,
     fontWeight: FONT_WEIGHTS.BOLD,
+    marginTop: 15,
   },
   headerSpacer: {
     width: 36,
   },
-  settingRow: {
-    backgroundColor: COLORS.backgroundWhite,
-    borderRadius: BORDER_RADIUS.MEDIUM,
-    paddingVertical: SPACING.MEDIUM,
-    paddingHorizontal: SPACING.MEDIUM,
-    marginBottom: SPACING.MEDIUM,
+  profileCard: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginHorizontal: SPACING.LARGE,
+    marginTop: SPACING.SMALL,
+    backgroundColor: 'rgba(255,255,255,0.16)',
+    borderRadius: BORDER_RADIUS.LARGE,
+    padding: SPACING.MEDIUM,
+  },
+  avatarCircle: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarInitial: {
+    fontSize: FONT_SIZES.LARGE,
+    color: COLORS.primary,
+    fontWeight: FONT_WEIGHTS.EXTRA_BOLD,
+  },
+  profileInfo: {
+    flex: 1,
+    marginLeft: SPACING.MEDIUM,
+  },
+  profileName: {
+    fontSize: FONT_SIZES.MEDIUM,
+    color: COLORS.backgroundWhite,
+    fontWeight: FONT_WEIGHTS.BOLD,
+  },
+  profileEmail: {
+    fontSize: FONT_SIZES.SMALL,
+    color: 'rgba(255,255,255,0.8)',
+    marginTop: 2,
+  },
+  editProfileButton: {
+    paddingVertical: SPACING.SMALL / 2,
+    paddingHorizontal: SPACING.MEDIUM,
+    borderRadius: BORDER_RADIUS.FULL,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+  },
+  editProfileText: {
+    fontSize: FONT_SIZES.SMALL,
+    color: COLORS.primary,
+    fontWeight: FONT_WEIGHTS.SEMI_BOLD,
+  },
+  section: {
+    marginBottom: SPACING.XXL,
+  },
+  sectionTitle: {
+    fontSize: FONT_SIZES.SMALL,
+    color: COLORS.textTertiary,
+    fontWeight: FONT_WEIGHTS.SEMI_BOLD,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: SPACING.SMALL,
+    marginLeft: SPACING.EXTRA_SMALL,
+  },
+  sectionCard: {
+    backgroundColor: COLORS.backgroundWhite,
+    borderRadius: BORDER_RADIUS.LARGE,
     borderWidth: 1,
     borderColor: COLORS.border,
+    overflow: 'hidden',
+  },
+  settingRow: {
+    paddingVertical: SPACING.MEDIUM,
+    paddingHorizontal: SPACING.MEDIUM,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  settingRowLast: {
+    borderBottomWidth: 0,
+  },
+  iconBadge: {
+    width: 38,
+    height: 38,
+    borderRadius: BORDER_RADIUS.MEDIUM,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   settingIcon: {
-    width: 24,
-    height: 24,
+    width: 20,
+    height: 20,
     resizeMode: 'contain',
   },
   settingContent: {
@@ -352,17 +492,39 @@ const styles = StyleSheet.create({
     color: COLORS.textTertiary,
   },
   logoutButton: {
-    marginTop: SPACING.XXXL,
-    backgroundColor: COLORS.error,
+    marginTop: SPACING.SMALL,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(244,67,54,0.08)',
     paddingVertical: SPACING.MEDIUM,
+    paddingHorizontal: SPACING.MEDIUM,
+    borderRadius: BORDER_RADIUS.LARGE,
+    borderWidth: 1.5,
+    borderColor: 'rgba(244,67,54,0.25)',
+  },
+  logoutIconBadge: {
+    width: 38,
+    height: 38,
     borderRadius: BORDER_RADIUS.MEDIUM,
+    backgroundColor: COLORS.error,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  logoutText: {
+  logoutIcon: {
+    fontSize: FONT_SIZES.LARGE,
     color: COLORS.backgroundWhite,
     fontWeight: FONT_WEIGHTS.BOLD,
+  },
+  logoutText: {
+    flex: 1,
+    marginLeft: SPACING.MEDIUM,
+    color: COLORS.error,
+    fontWeight: FONT_WEIGHTS.BOLD,
     fontSize: FONT_SIZES.MEDIUM,
+  },
+  logoutChevron: {
+    fontSize: FONT_SIZES.LARGE,
+    color: COLORS.error,
   },
 });
 

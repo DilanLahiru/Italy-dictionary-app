@@ -11,6 +11,9 @@ const user = require('../assets/images/avatar.png');
 const favorites = require('../assets/images/favorite.png');
 const settings = require('../assets/images/setting.png');
 const dictionary = require('../assets/images/dictionary.png');
+const BannerImage = require('../assets/images/italy_scene.png');
+const deleteImage = require('../assets/images/delete.png');
+const backImage = require('../assets/images/left.png');
 
 export const LANGUAGES = ['Italy', 'Sinhala', 'English'];
 
@@ -34,4 +37,7 @@ export const ASSETS = {
   favorites,
   settings,
   dictionary,
+  BannerImage,
+  deleteImage,
+  backImage,
 };

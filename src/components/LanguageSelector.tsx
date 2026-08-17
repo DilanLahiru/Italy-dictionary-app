@@ -29,7 +29,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
             selectedLanguage === language && styles.buttonActive,
           ]}
           onPress={() => onLanguageChange(language)}
-          activeOpacity={0.7}
+          activeOpacity={0.9}
         >
           <Text
             style={[
@@ -49,20 +49,29 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     marginBottom: SPACING.md,
+    marginTop: SPACING.MEDIUM,
   },
   button: {
-    paddingVertical: SPACING.xs,
-    paddingHorizontal: SPACING.md,
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.EXTRA_SMALL,
     borderRadius: BORDER_RADIUS.full,
     marginRight: SPACING.sm,
-    backgroundColor: '#EFEFEF',
+    backgroundColor: '#ffffff',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.06,
+    elevation: 2,
   },
   buttonActive: {
-    backgroundColor: '#2D79D6',
+    backgroundColor: '#2B82F8',
   },
   text: {
-    color: '#777',
-    fontSize: FONT_SIZES.md,
+    color: '#57677A',
+    fontSize: FONT_SIZES.sm,
+    fontWeight: FONT_WEIGHTS.medium,
   },
   textActive: {
     color: COLORS.backgroundWhite,

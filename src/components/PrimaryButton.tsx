@@ -53,7 +53,7 @@ const PrimaryButton: React.FC<PrimaryButtonProps> = ({
 
 const styles = StyleSheet.create({
   button: {
-    marginTop: SPACING.lg,
+    marginTop: 40,
     borderRadius: BORDER_RADIUS.full,
     overflow: 'hidden',
   },

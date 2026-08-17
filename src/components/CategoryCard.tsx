@@ -12,10 +12,8 @@ import {
   Image,
   ImageSourcePropType,
 } from 'react-native';
-import {COLORS} from '../constants/colors';
 import {
   SPACING,
-  BORDER_RADIUS,
   FONT_SIZES,
   FONT_WEIGHTS,
 } from '../constants/dimensions';
@@ -25,6 +23,8 @@ interface CategoryCardProps {
   label: string;
   onPress?: () => void;
   disabled?: boolean;
+  cardColor?: string;
+  iconBackgroundColor?: string;
 }
 
 const CategoryCard: React.FC<CategoryCardProps> = ({
@@ -32,24 +32,22 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
   label,
   onPress,
   disabled = false,
+  cardColor = '#FFFFFF',
+  iconBackgroundColor = '#F3F7FB',
 }) => {
-  console.log('====================================');
-  console.log(label);
-  console.log('====================================');
-
-  // Determine if icon is a local require() or a URL string
   const isLocalIcon = typeof icon !== 'string';
-  const iconSource = isLocalIcon 
-    ? icon 
-    : { uri: 'https://italygoadmin.com' + icon };
+  const iconSource = isLocalIcon ? icon : { uri: 'https://italygoadmin.com' + icon };
 
   return (
     <TouchableOpacity
-      style={[styles.card, disabled && styles.disabled]}
+      style={[styles.card, { backgroundColor: cardColor }, disabled && styles.disabled]}
       onPress={onPress}
       disabled={disabled}
-      activeOpacity={0.85}>
-      <Image source={iconSource} style={styles.icon} />
+      activeOpacity={0.9}
+    >
+      <View style={[styles.iconWrap, { backgroundColor: iconBackgroundColor }]}>
+        <Image source={iconSource} style={styles.icon} />
+      </View>
       <Text style={styles.label}>{label}</Text>
     </TouchableOpacity>
   );
@@ -57,24 +55,42 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    width: '48%',
-    backgroundColor: COLORS.backgroundWhite,
-    borderRadius: BORDER_RADIUS.md,
-    padding: SPACING.lg,
+    width: '28%',
+    minHeight: 80,
+    borderRadius: 18,
+    paddingVertical: SPACING.lg,
+    paddingHorizontal: SPACING.md,
     alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: SPACING.md,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 3,
+    backgroundColor: '#FFFFFF',
+  },
+  iconWrap: {
+    width: 42,
+    height: 42,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: SPACING.sm,
     elevation: 2,
   },
   icon: {
-    width: 64,
-    height: 64,
+    width: 25,
+    height: 25,
     resizeMode: 'contain',
   },
   label: {
-    marginTop: SPACING.md,
+    textAlign: 'center',
     fontWeight: FONT_WEIGHTS.bold,
-    color: COLORS.textLight,
-    fontSize: FONT_SIZES.md,
+    color: '#1E2D3A',
+    fontSize: FONT_SIZES.SMALL,
+    lineHeight: 22,
+    marginTop: SPACING.xs,
   },
   disabled: {
     opacity: 0.6,

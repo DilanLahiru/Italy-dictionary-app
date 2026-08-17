@@ -22,6 +22,8 @@ import PrivacyPolicyScreen from '../screens/PrivacyPolicyScreen';
 import SupportScreen from '../screens/SupportScreen';
 import TermsAndConditionsScreen from '../screens/TermsAndConditionsScreen';
 import AppVersionScreen from '../screens/AppVersionScreen';
+import AllCategoriesScreen from '../screens/AllCategoriesScreen';
+import { useAppSelector } from '../store/hooks';
 
 export type ScreenName =
     'splash'
@@ -40,7 +42,8 @@ export type ScreenName =
   | 'support'
   | 'profile'
   | 'searchResults'
-  | 'privacyPolicy';
+  | 'privacyPolicy'
+  | 'allCategories';
 
 interface AppNavigatorProps {}
 
@@ -58,6 +61,7 @@ const AppNavigator: React.FC<AppNavigatorProps> = () => {
   const [currentScreen, setCurrentScreen] = useState<ScreenName>('splash');
   const [isCheckingUser, setIsCheckingUser] = useState(true);
   const [navParams, setNavParams] = useState<NavigationParams>({});
+  const { categories } = useAppSelector((state: any) => state.word);
 
   /**
    * Check if user details exist in AsyncStorage
@@ -124,7 +128,7 @@ const AppNavigator: React.FC<AppNavigatorProps> = () => {
           />
         );
       case 'register':
-        return <RegisterScreen onBackToLogin={() => setCurrentScreen('home')} />;
+        return <RegisterScreen onBackToLogin={() => setCurrentScreen('login')} />;
       case 'home':
         return (
           <HomeScreen
@@ -143,6 +147,19 @@ const AppNavigator: React.FC<AppNavigatorProps> = () => {
             onOpenSearchResults={(query) => {
               setNavParams({ searchQuery: query });
               setCurrentScreen('searchResults');
+            }}
+            onOpenAllCategories={() => setCurrentScreen('allCategories')}
+          />
+        );
+      case 'allCategories':
+        return (
+          <AllCategoriesScreen
+            categories={categories || []}
+            onBack={() => setCurrentScreen('home')}
+            onOpenAZ={() => setCurrentScreen('atoz')}
+            onOpenCategoryDetail={(category) => {
+              setNavParams({ ...navParams, category });
+              setCurrentScreen('categoryDetail');
             }}
           />
         );
@@ -180,6 +197,7 @@ const AppNavigator: React.FC<AppNavigatorProps> = () => {
           <FavoritesScreen
             onOpenHome={() => setCurrentScreen('home')}
             onOpenSettings={() => setCurrentScreen('settings')}
+            onOpenProfile={() => setCurrentScreen('profile')}
           />
         );
       case 'settings':

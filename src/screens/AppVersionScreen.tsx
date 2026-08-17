@@ -147,6 +147,7 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.EXTRA_LARGE,
     color: COLORS.primary,
     fontWeight: FONT_WEIGHTS.BOLD,
+    marginTop: 10,
   },
   headerSpacer: {
     width: 36,

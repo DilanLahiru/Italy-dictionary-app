@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
   ScrollView,
+  Image,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useAppDispatch } from '../store/hooks';
@@ -24,12 +25,12 @@ import {
 } from '../utils/validation';
 import FormInput from '../components/FormInput';
 import PrimaryButton from '../components/PrimaryButton';
-import SecondaryButton from '../components/SecondaryButton';
 import TermsCheckbox from '../components/TermsCheckbox';
 import { COLORS } from '../constants/colors';
-import { SPACING, FONT_SIZES, FONT_WEIGHTS } from '../constants/dimensions';
+import { SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../constants/dimensions';
+import { ALERT_TYPE, Dialog, Toast } from 'react-native-alert-notification';
 
-const googleIcon = require('../assets/images/google.png');
+const logoImage = require('../assets/images/logo.png');
 
 interface RegisterScreenProps {
   onBackToLogin?: () => void;
@@ -60,6 +61,11 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ onBackToLogin }) => {
     const error = validatePassword(password);
     if (error) {
       form.setErrors({ password: error });
+    }
+    // Re-check confirm password match whenever the password itself changes
+    if (form.state.confirmPassword) {
+      const matchError = validatePasswordMatch(password, form.state.confirmPassword);
+      form.setErrors({ confirmPassword: matchError });
     }
   };
 
@@ -112,11 +118,22 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ onBackToLogin }) => {
       if (result.type === RegisterUser.fulfilled.type) {
         form.resetForm();
         onBackToLogin?.();
+      } else {
+        const message =
+          typeof result.payload === 'string'
+            ? result.payload
+            : 'Could not create your account. Please check your details and try again.';
+        Toast.show({
+          type: ALERT_TYPE.DANGER,
+          title: 'Registration Failed',
+          textBody: message,
+        });
       }
     } catch (error) {
-      console.error('Register error:', error);
-      form.setErrors({
-        email: 'Registration failed. Please try again.',
+      Toast.show({
+        type: ALERT_TYPE.DANGER,
+        title: 'Registration Failed',
+        textBody: 'Something went wrong while creating your account. Please try again.',
       });
     } finally {
       form.setIsLoading(false);
@@ -139,18 +156,28 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ onBackToLogin }) => {
   };
 
   return (
-    <LinearGradient
-      colors={[COLORS.backgroundLight, COLORS.backgroundLightAlt]}
-      style={styles.container}
-    >
-      <SafeAreaView style={styles.safe}>
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-          {/* Header Section */}
-          <View style={styles.headerSection}>
-            <Text style={styles.header}>Sign up</Text>
-            <Text style={styles.subHeader}>Please create a new account</Text>
+    <View style={styles.container}>
+      <LinearGradient
+        colors={['#1565C0', '#1D5FE5']}
+        start={{x: 0, y: 0}}
+        end={{x: 1, y: 1}}
+        style={styles.heroGradient}
+      >
+        <View style={styles.heroPatternCircleLarge} />
+        <View style={styles.heroPatternCircleSmall} />
+        <SafeAreaView>
+          <View style={styles.heroContent}>
+            <View style={styles.logoCircle}>
+              <Image source={logoImage} style={styles.logoImage} resizeMode="contain" />
+            </View>
+            <Text style={styles.heroTitle}>Create Account ✨</Text>
+            <Text style={styles.heroSubtitle}>Start your Italian learning journey</Text>
           </View>
+        </SafeAreaView>
+      </LinearGradient>
 
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+        <View style={styles.formCard}>
           {/* Form Section */}
           <View style={styles.formSection}>
             <FormInput
@@ -160,6 +187,11 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ onBackToLogin }) => {
               onChangeText={handleNameChange}
               error={form.state.errors.name}
               autoCapitalize="words"
+              icon={
+                <View style={[styles.inputIconBadge, {backgroundColor: '#E8F5E9'}]}>
+                  <Text style={styles.inputIconText}>👤</Text>
+                </View>
+              }
             />
 
             <FormInput
@@ -170,6 +202,12 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ onBackToLogin }) => {
               value={form.state.email}
               onChangeText={handleEmailChange}
               error={form.state.errors.email}
+              containerStyle={{ marginTop: SPACING.lg }}
+              icon={
+                <View style={[styles.inputIconBadge, {backgroundColor: '#E3F2FD'}]}>
+                  <Text style={styles.inputIconText}>📧</Text>
+                </View>
+              }
             />
 
             <FormInput
@@ -179,6 +217,12 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ onBackToLogin }) => {
               value={form.state.password}
               onChangeText={handlePasswordChange}
               error={form.state.errors.password}
+              containerStyle={{ marginTop: SPACING.lg }}
+              icon={
+                <View style={[styles.inputIconBadge, {backgroundColor: '#FFF3E0'}]}>
+                  <Text style={styles.inputIconText}>🔒</Text>
+                </View>
+              }
             />
 
             <FormInput
@@ -188,6 +232,12 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ onBackToLogin }) => {
               value={form.state.confirmPassword}
               onChangeText={handleConfirmPasswordChange}
               error={form.state.errors.confirmPassword}
+              containerStyle={{ marginTop: SPACING.lg }}
+              icon={
+                <View style={[styles.inputIconBadge, {backgroundColor: '#F3E5F5'}]}>
+                  <Text style={styles.inputIconText}>🔑</Text>
+                </View>
+              }
             />
 
             {/* Terms Agreement */}
@@ -209,17 +259,6 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ onBackToLogin }) => {
             />
           </View>
 
-          {/* Divider */}
-          <Text style={styles.divider}>Or</Text>
-
-          {/* Google Sign Up Button */}
-          {/* <SecondaryButton
-            title="Sign with google"
-            onPress={handleGoogleSignUp}
-            icon={googleIcon}
-            style={styles.googleButton}
-          /> */}
-
           {/* Sign In Link */}
           <View style={styles.signInRow}>
             <Text style={styles.signInText}>Do you have an account?</Text>
@@ -227,56 +266,105 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ onBackToLogin }) => {
               <Text style={styles.signInLink}>Sign in</Text>
             </TouchableOpacity>
           </View>
-        </ScrollView>
-      </SafeAreaView>
-    </LinearGradient>
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: COLORS.backgroundLight,
   },
-  safe: {
-    flex: 1,
+  heroGradient: {
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+    overflow: 'hidden',
   },
-  scrollContent: {
-    paddingHorizontal: SPACING.xl,
+  heroPatternCircleLarge: {
+    position: 'absolute',
+    width: 160,
+    height: 160,
+    borderRadius: 80,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    top: -50,
+    right: -40,
+  },
+  heroPatternCircleSmall: {
+    position: 'absolute',
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    bottom: -20,
+    left: -20,
+  },
+  heroContent: {
+    alignItems: 'center',
     paddingTop: SPACING.lg,
-    paddingBottom: SPACING.xl,
+    paddingBottom: SPACING.xxxl,
+    paddingHorizontal: SPACING.xl,
   },
-  headerSection: {
-    marginBottom: SPACING.xl,
+  logoCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: SPACING.md,
   },
-  header: {
+  logoImage: {
+    width: 44,
+    height: 44,
+  },
+  heroTitle: {
     fontSize: FONT_SIZES.xxl,
-    color: COLORS.primary,
+    color: COLORS.backgroundWhite,
     fontWeight: FONT_WEIGHTS.bold,
     marginBottom: SPACING.xs,
   },
-  subHeader: {
-    color: COLORS.textMuted,
+  heroSubtitle: {
+    color: 'rgba(255,255,255,0.85)',
     fontSize: FONT_SIZES.md,
+  },
+  scrollContent: {
+    paddingBottom: SPACING.xl,
+  },
+  formCard: {
+    backgroundColor: COLORS.backgroundWhite,
+    borderRadius: BORDER_RADIUS.lg,
+    marginHorizontal: SPACING.lg,
+    marginTop: SPACING.EXTRA_LARGE,
+    padding: SPACING.xl,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 4,
   },
   formSection: {
     marginBottom: SPACING.lg,
   },
+  inputIconBadge: {
+    width: 30,
+    height: 30,
+    borderRadius: BORDER_RADIUS.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  inputIconText: {
+    fontSize: FONT_SIZES.sm,
+  },
   signButton: {
     marginTop: SPACING.xl,
-  },
-  divider: {
-    textAlign: 'center',
-    marginVertical: SPACING.lg,
-    color: COLORS.textTertiary,
-    fontSize: FONT_SIZES.md,
-  },
-  googleButton: {
-    marginBottom: SPACING.xl,
   },
   signInRow: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: SPACING.xl,
   },
   signInText: {
     color: COLORS.textSecondary,

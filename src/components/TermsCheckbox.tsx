@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginTop: SPACING.lg,
+    marginTop: 30,
   },
   checkbox: {
     width: 20,

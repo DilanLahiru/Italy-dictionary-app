@@ -19,46 +19,97 @@ const SearchSection: React.FC<SearchSectionProps> = ({
   onSearchTextChange,
   onSearch,
 }) => {
+  const handleSubmit = () => {
+    if (searchText.trim()) {
+      onSearch();
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <TextInput
-        style={styles.input}
-        placeholder="Search Text..."
-        placeholderTextColor={COLORS.textTertiary}
-        value={searchText}
-        onChangeText={onSearchTextChange}
-      />
-      <TouchableOpacity style={styles.searchButton} onPress={onSearch} activeOpacity={0.8}>
-        <Text style={styles.searchButtonText}>Search</Text>
-      </TouchableOpacity>
+      <View style={styles.searchField}>
+        <View style={styles.iconWrapper} pointerEvents="none">
+          <Text style={styles.searchIcon}>⌕</Text>
+        </View>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Search words, phrases..."
+          placeholderTextColor="rgba(255,255,255,0.82)"
+          value={searchText}
+          onChangeText={onSearchTextChange}
+          onSubmitEditing={handleSubmit}
+          returnKeyType="search"
+          blurOnSubmit
+          autoCapitalize="none"
+          autoCorrect={false}
+          selectionColor="#ffffff"
+        />
+
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={handleSubmit}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.actionIcon}>◉</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    marginTop: SPACING.xxxl * 0.8,
+    marginBottom: SPACING.sm,
+  },
+  searchField: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: '#EEE',
-    paddingTop: SPACING.md,
+    height: 56,
+    backgroundColor: '#3494F5',
+    borderRadius: 28,
+    paddingHorizontal: SPACING.md,
+    shadowColor: '#1D4F9A',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.18,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  iconWrapper: {
+    width: 26,
+    height: 26,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: SPACING.sm,
+  },
+  searchIcon: {
+    fontSize: 22,
+    color: COLORS.backgroundWhite,
+    fontWeight: FONT_WEIGHTS.bold,
+    lineHeight: 22,
   },
   input: {
     flex: 1,
-    color: COLORS.textDark,
-    fontSize: FONT_SIZES.md,
-  },
-  searchButton: {
-    backgroundColor: '#E94A4A',
-    paddingVertical: SPACING.xs,
-    paddingHorizontal: SPACING.md,
-    borderRadius: BORDER_RADIUS.sm,
-    marginLeft: SPACING.md,
-  },
-  searchButtonText: {
     color: COLORS.backgroundWhite,
-    fontWeight: FONT_WEIGHTS.bold,
     fontSize: FONT_SIZES.md,
+    paddingVertical: 0,
+    includeFontPadding: false,
+  },
+  actionButton: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: 'rgba(255,255,255,0.16)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: SPACING.sm,
+  },
+  actionIcon: {
+    color: COLORS.backgroundWhite,
+    fontSize: 17,
+    fontWeight: FONT_WEIGHTS.bold,
+    //lineHeight: 17,
   },
 });
 

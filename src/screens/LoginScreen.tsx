@@ -12,6 +12,7 @@ import {
   SafeAreaView,
   Switch,
   ScrollView,
+  Image,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LinearGradient from 'react-native-linear-gradient';
@@ -21,12 +22,12 @@ import { useLoginForm } from '../hooks/useLoginForm';
 import { validateEmail, validatePassword } from '../utils/validation';
 import FormInput from '../components/FormInput';
 import PrimaryButton from '../components/PrimaryButton';
-import SecondaryButton from '../components/SecondaryButton';
 import { COLORS } from '../constants/colors';
 import { SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../constants/dimensions';
 import { ALERT_TYPE, Dialog } from 'react-native-alert-notification';
 
 const googleIcon = require('../assets/images/google.png');
+const logoImage = require('../assets/images/logo.png');
 
 interface LoginScreenProps {
   onCreateAccount?: () => void;
@@ -140,18 +141,32 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onCreateAccount, onSignIn }) 
   };
 
   return (
-    <LinearGradient
-      colors={[COLORS.backgroundLight, COLORS.backgroundLightAlt]}
-      style={styles.container}
-    >
-      <SafeAreaView style={styles.safe}>
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-          {/* Header Section */}
-          <View style={styles.headerSection}>
-            <Text style={styles.header}>Sign in</Text>
-            <Text style={styles.subHeader}>Please log in into your account</Text>
+    <View style={styles.container}>
+      <LinearGradient
+        colors={['#1565C0', '#1D5FE5']}
+        start={{x: 0, y: 0}}
+        end={{x: 1, y: 1}}
+        style={styles.heroGradient}
+      >
+        <View style={styles.heroPatternCircleLarge} />
+        <View style={styles.heroPatternCircleSmall} />
+        <SafeAreaView>
+          <View style={styles.heroContent}>
+            <View style={styles.logoCircle}>
+              <Image source={logoImage} style={styles.logoImage} resizeMode="contain" />
+            </View>
+            <Text style={styles.heroTitle}>Welcome Back 👋</Text>
+            <Text style={styles.heroSubtitle}>Sign in to keep learning Italian</Text>
           </View>
+        </SafeAreaView>
+      </LinearGradient>
 
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.formCard}>
           {/* Form Section */}
           <View style={styles.formSection}>
             <FormInput
@@ -162,6 +177,11 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onCreateAccount, onSignIn }) 
               value={form.state.email}
               onChangeText={handleEmailChange}
               error={form.state.errors.email}
+              icon={
+                <View style={[styles.inputIconBadge, {backgroundColor: '#E3F2FD'}]}>
+                  <Text style={styles.inputIconText}>📧</Text>
+                </View>
+              }
             />
 
             <FormInput
@@ -171,6 +191,12 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onCreateAccount, onSignIn }) 
               value={form.state.password}
               onChangeText={handlePasswordChange}
               error={form.state.errors.password}
+              containerStyle={{ marginTop: SPACING.lg }}
+              icon={
+                <View style={[styles.inputIconBadge, {backgroundColor: '#FFF3E0'}]}>
+                  <Text style={styles.inputIconText}>🔒</Text>
+                </View>
+              }
             />
 
             {/* Remember Me & Forgot Password */}
@@ -198,15 +224,20 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onCreateAccount, onSignIn }) 
           </View>
 
           {/* Divider */}
-          <Text style={styles.divider}>Or</Text>
+          {/* <View style={styles.dividerRow}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>Or continue with</Text>
+            <View style={styles.dividerLine} />
+          </View> */}
 
           {/* Google Sign In Button */}
-          {/* <SecondaryButton
-            title="Sign with google"
+          {/* <TouchableOpacity
+            style={styles.socialCircle}
             onPress={handleGoogleSignIn}
-            icon={googleIcon}
-            style={styles.googleButton}
-          /> */}
+            activeOpacity={0.8}
+          >
+            <Image source={googleIcon} style={styles.socialIcon} resizeMode="contain" />
+          </TouchableOpacity> */}
 
           {/* Sign Up Link */}
           <View style={styles.signUpRow}>
@@ -215,36 +246,83 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onCreateAccount, onSignIn }) 
               <Text style={styles.signUpLink}>Create new account</Text>
             </TouchableOpacity>
           </View>
-        </ScrollView>
-      </SafeAreaView>
-    </LinearGradient>
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: COLORS.backgroundLight,
   },
-  safe: {
-    flex: 1,
+  heroGradient: {
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+    overflow: 'hidden',
   },
-  scrollContent: {
-    paddingHorizontal: SPACING.xl,
+  heroPatternCircleLarge: {
+    position: 'absolute',
+    width: 160,
+    height: 160,
+    borderRadius: 80,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    top: -50,
+    right: -40,
+  },
+  heroPatternCircleSmall: {
+    position: 'absolute',
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    bottom: -20,
+    left: -20,
+  },
+  heroContent: {
+    alignItems: 'center',
     paddingTop: SPACING.lg,
-    paddingBottom: SPACING.xl,
+    paddingBottom: SPACING.xxxl,
+    paddingHorizontal: SPACING.xl,
   },
-  headerSection: {
-    marginBottom: SPACING.xl,
+  logoCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: SPACING.md,
   },
-  header: {
+  logoImage: {
+    width: 44,
+    height: 44,
+  },
+  heroTitle: {
     fontSize: FONT_SIZES.xxl,
-    color: COLORS.primary,
+    color: COLORS.backgroundWhite,
     fontWeight: FONT_WEIGHTS.bold,
     marginBottom: SPACING.xs,
   },
-  subHeader: {
-    color: COLORS.textMuted,
+  heroSubtitle: {
+    color: 'rgba(255,255,255,0.85)',
     fontSize: FONT_SIZES.md,
+  },
+  scrollContent: {
+    paddingBottom: SPACING.xl,
+  },
+  formCard: {
+    backgroundColor: COLORS.backgroundWhite,
+    borderRadius: BORDER_RADIUS.lg,
+    marginHorizontal: SPACING.lg,
+    marginTop: SPACING.EXTRA_LARGE,
+    padding: SPACING.xl,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 4,
   },
   formSection: {
     marginBottom: SPACING.lg,
@@ -253,7 +331,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: SPACING.md,
+    marginTop: 30,
   },
   rememberRow: {
     flexDirection: 'row',
@@ -268,14 +346,46 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     fontSize: FONT_SIZES.md,
   },
-  divider: {
-    textAlign: 'center',
-    marginVertical: SPACING.lg,
-    color: COLORS.textTertiary,
-    fontSize: FONT_SIZES.md,
+  inputIconBadge: {
+    width: 30,
+    height: 30,
+    borderRadius: BORDER_RADIUS.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  googleButton: {
-    marginBottom: SPACING.xl,
+  inputIconText: {
+    fontSize: FONT_SIZES.sm,
+  },
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: SPACING.lg,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: COLORS.border,
+  },
+  dividerText: {
+    marginHorizontal: SPACING.md,
+    color: COLORS.textTertiary,
+    fontSize: FONT_SIZES.sm,
+  },
+  socialCircle: {
+    alignSelf: 'center',
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: COLORS.backgroundWhite,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    marginBottom: SPACING.md,
+  },
+  socialIcon: {
+    width: 24,
+    height: 24,
   },
   signUpRow: {
     flexDirection: 'row',

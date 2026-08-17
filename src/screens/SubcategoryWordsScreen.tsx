@@ -3,7 +3,7 @@
  * Displays words for a selected subcategory
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
   SafeAreaView,
   View,
@@ -13,9 +13,11 @@ import {
   FlatList,
   Image,
   ActivityIndicator,
+  TextInput,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ALERT_TYPE, Dialog,Toast } from 'react-native-alert-notification';
 import WordDetailModal from './WordDetailModal';
 import { COLORS } from '../constants/colors';
 import { SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../constants/dimensions';
@@ -66,6 +68,7 @@ const SubcategoryWordsScreen: React.FC<SubcategoryWordsScreenProps> = ({
   const [favorites, setFavorites] = useState<FavoriteWord[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('home');
+  const [searchQuery, setSearchQuery] = useState('');
 
   /**
    * Load favorites and fetch words on mount
@@ -211,6 +214,11 @@ const SubcategoryWordsScreen: React.FC<SubcategoryWordsScreenProps> = ({
           Image: word.Image,
         };
         newFavorites = [...prev, favoriteWord];
+        Toast.show({
+          type: ALERT_TYPE.SUCCESS,
+          title: 'Added to Favorites',
+          textBody: `"${wordText}" has been added to your favorites`,
+        });
       }
 
       saveFavorites(newFavorites);
@@ -264,54 +272,101 @@ const SubcategoryWordsScreen: React.FC<SubcategoryWordsScreenProps> = ({
       <TouchableOpacity
         style={styles.wordItem}
         onPress={() => handleWordPress(item)}
-        activeOpacity={0.7}
+        activeOpacity={0.8}
       >
         <View style={styles.wordContent}>
-          {imageUrl && (
+          {imageUrl ? (
             <Image
               source={{ uri: 'https://italygoadmin.com' + imageUrl }}
               style={styles.wordImage}
             />
+          ) : (
+            <View style={styles.wordImageFallback}>
+              <Text style={styles.wordImageFallbackText}>
+                {wordText.charAt(0).toUpperCase()}
+              </Text>
+            </View>
           )}
           <View style={styles.wordInfo}>
-            <Text style={styles.wordText}>{wordText}</Text>
+            <Text style={styles.wordText} numberOfLines={1}>{wordText}</Text>
             {item.English_word && (
-              <Text style={styles.wordTranslation}>{item.English_word}</Text>
+              <Text style={styles.wordTranslation} numberOfLines={1}>{item.English_word}</Text>
             )}
           </View>
         </View>
-        <TouchableOpacity onPress={() => toggleFavorite(item)}>
-          <Text style={[styles.heart, isFav && { color: '#E53935' }]}>
+        <TouchableOpacity
+          style={styles.heartButton}
+          onPress={() => toggleFavorite(item)}
+        >
+          <Text style={[styles.heart, isFav && styles.heartActive]}>
             {isFav ? '♥' : '♡'}
           </Text>
         </TouchableOpacity>
+        <Text style={styles.chev}>›</Text>
       </TouchableOpacity>
     );
   };
+
+  const visibleWords = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) {
+      return filteredWords;
+    }
+    return filteredWords.filter(word => getWordText(word).toLowerCase().includes(query));
+  }, [filteredWords, searchQuery]);
+
+  const renderHeader = () => (
+    <LinearGradient
+      colors={['#1565C0', '#1D5FE5']}
+      start={{x: 0, y: 0}}
+      end={{x: 1, y: 1}}
+      style={styles.headerGradient}
+    >
+      <View style={styles.headerRow}>
+        <TouchableOpacity onPress={onBack} style={styles.backButton} activeOpacity={0.8}>
+          <Text style={styles.backButtonText}>‹</Text>
+        </TouchableOpacity>
+        <View style={styles.headerTextWrap}>
+          <Text style={styles.title} numberOfLines={1}>{subcategory.name}</Text>
+          <Text style={styles.headerSubtitle}>
+            {filteredWords.length} {filteredWords.length === 1 ? 'word' : 'words'}
+          </Text>
+        </View>
+        <View style={{ width: 36 }} />
+      </View>
+
+      <View style={styles.searchBar}>
+        <Text style={styles.searchIcon}>🔍</Text>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search a word..."
+          placeholderTextColor="rgba(255,255,255,0.7)"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+        {!!searchQuery && (
+          <TouchableOpacity onPress={() => setSearchQuery('')}>
+            <Text style={styles.searchClear}>✕</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    </LinearGradient>
+  );
 
   /**
    * Render loading state
    */
   if (loading) {
     return (
-      <LinearGradient
-        colors={[COLORS.backgroundLight, COLORS.backgroundLightAlt]}
-        style={styles.container}
-      >
+      <View style={styles.container}>
         <SafeAreaView style={styles.safe}>
-          <View style={styles.headerRow}>
-            <TouchableOpacity onPress={onBack} style={styles.backButton}>
-              <Text style={styles.backButtonText}>← Back</Text>
-            </TouchableOpacity>
-            <Text style={styles.title}>{subcategory.name}</Text>
-            <View style={{ width: 40 }} />
-          </View>
+          {renderHeader()}
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={COLORS.primary} />
             <Text style={styles.loadingText}>Loading words...</Text>
           </View>
         </SafeAreaView>
-      </LinearGradient>
+      </View>
     );
   }
 
@@ -320,49 +375,37 @@ const SubcategoryWordsScreen: React.FC<SubcategoryWordsScreenProps> = ({
    */
   if (filteredWords.length === 0) {
     return (
-      <LinearGradient
-        colors={[COLORS.backgroundLight, COLORS.backgroundLightAlt]}
-        style={styles.container}
-      >
+      <View style={styles.container}>
         <SafeAreaView style={styles.safe}>
-          <View style={styles.headerRow}>
-            <TouchableOpacity onPress={onBack} style={styles.backButton}>
-              <Text style={styles.backButtonText}>← Back</Text>
-            </TouchableOpacity>
-            <Text style={styles.title}>{subcategory.name}</Text>
-            <View style={{ width: 40 }} />
-          </View>
+          {renderHeader()}
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No words found</Text>
+            <Text style={styles.emptyEmoji}>📖</Text>
+            <Text style={styles.emptyText}>No words found in this category</Text>
           </View>
         </SafeAreaView>
-      </LinearGradient>
+      </View>
     );
   }
 
   return (
-    <LinearGradient
-      colors={[COLORS.backgroundLight, COLORS.backgroundLightAlt]}
-      style={styles.container}
-    >
+    <View style={styles.container}>
       <SafeAreaView style={styles.safe}>
-        {/* Header */}
-        <View style={styles.headerRow}>
-          <TouchableOpacity onPress={onBack} style={styles.backButton}>
-            <Text style={styles.backButtonText}>← Back</Text>
-          </TouchableOpacity>
-          <Text style={styles.title}>{subcategory.name}</Text>
-          <View style={{ width: 40 }} />
-        </View>
+        {renderHeader()}
 
         {/* Words List */}
         <FlatList
-          data={filteredWords}
+          data={visibleWords}
           keyExtractor={(item, index) => `${getWordId(item)}-${index}`}
           renderItem={renderWordItem}
           scrollEnabled={true}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyEmoji}>🔎</Text>
+              <Text style={styles.emptyText}>No words match "{searchQuery}"</Text>
+            </View>
+          }
         />
       </SafeAreaView>
 
@@ -393,37 +436,83 @@ const SubcategoryWordsScreen: React.FC<SubcategoryWordsScreenProps> = ({
         activeTabId={activeTab}
         onTabPress={handleTabPress}
       />
-    </LinearGradient>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: COLORS.backgroundLight,
   },
   safe: {
     flex: 1,
-    paddingHorizontal: SPACING.md,
+  },
+  headerGradient: {
+    borderBottomLeftRadius: BORDER_RADIUS.lg,
+    borderBottomRightRadius: BORDER_RADIUS.lg,
+    paddingBottom: SPACING.md,
   },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: SPACING.md,
-    marginBottom: SPACING.lg,
+    paddingHorizontal: SPACING.xl,
+    paddingTop: SPACING.xl,
+    paddingBottom: SPACING.sm,
   },
   backButton: {
-    padding: SPACING.xs,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   backButtonText: {
-    color: COLORS.primary,
-    fontSize: FONT_SIZES.md,
+    color: COLORS.backgroundWhite,
+    fontSize: FONT_SIZES.xxl,
     fontWeight: FONT_WEIGHTS.bold,
+    marginTop: -8,
+  },
+  headerTextWrap: {
+    flex: 1,
+    alignItems: 'center',
+    paddingHorizontal: SPACING.sm,
   },
   title: {
-    fontSize: FONT_SIZES.xl,
-    color: COLORS.primary,
+    fontSize: FONT_SIZES.lg,
+    color: COLORS.backgroundWhite,
     fontWeight: FONT_WEIGHTS.bold,
+  },
+  headerSubtitle: {
+    fontSize: FONT_SIZES.xs,
+    color: 'rgba(255,255,255,0.85)',
+    marginTop: 2,
+    fontWeight: FONT_WEIGHTS.medium,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    borderRadius: BORDER_RADIUS.md,
+    marginHorizontal: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    height: 42,
+  },
+  searchIcon: {
+    fontSize: FONT_SIZES.sm,
+    marginRight: SPACING.sm,
+  },
+  searchInput: {
+    flex: 1,
+    color: COLORS.backgroundWhite,
+    fontSize: FONT_SIZES.sm,
+  },
+  searchClear: {
+    color: COLORS.backgroundWhite,
+    fontSize: FONT_SIZES.sm,
+    paddingLeft: SPACING.sm,
   },
   loadingContainer: {
     flex: 1,
@@ -439,12 +528,20 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingTop: SPACING.xxxl,
+  },
+  emptyEmoji: {
+    fontSize: 36,
+    marginBottom: SPACING.sm,
   },
   emptyText: {
     color: COLORS.textLight,
     fontSize: FONT_SIZES.md,
+    textAlign: 'center',
+    paddingHorizontal: SPACING.xl,
   },
   listContent: {
+    paddingTop: SPACING.md,
     paddingBottom: SPACING.xl,
     paddingHorizontal: SPACING.md,
   },
@@ -455,8 +552,13 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.md,
     marginBottom: SPACING.md,
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
     elevation: 2,
     width: '100%',
   },
@@ -472,6 +574,19 @@ const styles = StyleSheet.create({
     borderRadius: BORDER_RADIUS.sm,
     resizeMode: 'cover',
   },
+  wordImageFallback: {
+    width: 50,
+    height: 50,
+    borderRadius: BORDER_RADIUS.sm,
+    backgroundColor: COLORS.backgroundLightAlt,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  wordImageFallbackText: {
+    fontSize: FONT_SIZES.lg,
+    color: COLORS.primary,
+    fontWeight: FONT_WEIGHTS.bold,
+  },
   wordInfo: {
     flex: 1,
   },
@@ -485,10 +600,21 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.sm,
     color: COLORS.textLight,
   },
+  heartButton: {
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
+  },
   heart: {
     fontSize: FONT_SIZES.lg,
     color: COLORS.textLight,
-    marginLeft: SPACING.md,
+  },
+  heartActive: {
+    color: '#E53935',
+  },
+  chev: {
+    fontSize: FONT_SIZES.lg,
+    color: COLORS.textLight,
+    marginLeft: SPACING.xs,
   },
 });
 
