@@ -24,7 +24,7 @@ import FormInput from '../components/FormInput';
 import PrimaryButton from '../components/PrimaryButton';
 import { COLORS } from '../constants/colors';
 import { SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../constants/dimensions';
-import { ALERT_TYPE, Dialog } from 'react-native-alert-notification';
+import { ALERT_TYPE, Dialog, Toast } from 'react-native-alert-notification';
 
 const googleIcon = require('../assets/images/google.png');
 const logoImage = require('../assets/images/logo.png');
@@ -114,17 +114,20 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onCreateAccount, onSignIn }) 
             console.error('Error clearing saved credentials:', storageError);
           }
         }
-        
+        Toast.show({
+          type: ALERT_TYPE.SUCCESS,
+          title: 'Login Successful',
+          textBody: 'You are now logged in.',
+        });
         form.resetForm();
         onSignIn?.();
       }
     } catch (error) {
-      Dialog.show({
+      Toast.show({
         type: ALERT_TYPE.DANGER,
-        title: 'Error',
-        textBody: 'Login failed. Please try again.',
-        button: 'OK',
-      });
+        title: 'Login Failed',
+        textBody: 'Something went wrong while logging in. Please try again.',
+      }); 
     } finally {
       form.setIsLoading(false);
     }
@@ -282,7 +285,7 @@ const styles = StyleSheet.create({
   },
   heroContent: {
     alignItems: 'center',
-    paddingTop: SPACING.lg,
+    paddingTop: SPACING.xxxl,
     paddingBottom: SPACING.xxxl,
     paddingHorizontal: SPACING.xl,
   },

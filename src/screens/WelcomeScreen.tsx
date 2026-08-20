@@ -75,7 +75,9 @@ const WelcomeSlider = ({ onGetStart }: Props) => {
       onGetStart?.()
       return
     }
-    flatListRef.current?.scrollToIndex({ index: currentIndex + 1, animated: true })
+    const nextIndex = currentIndex + 1
+    flatListRef.current?.scrollToOffset({ offset: nextIndex * deviceWidth, animated: true })
+    setCurrentIndex(nextIndex)
   }
 
   return (
@@ -119,6 +121,11 @@ const WelcomeSlider = ({ onGetStart }: Props) => {
           showsHorizontalScrollIndicator={false}
           scrollEventThrottle={16}
           onMomentumScrollEnd={onScrollEnd}
+          getItemLayout={(_, index) => ({
+            length: deviceWidth,
+            offset: deviceWidth * index,
+            index,
+          })}
           style={styles.flatList}
           renderItem={({ item }) => (
             <View style={[styles.heroZone, { width: deviceWidth }]}>
@@ -246,7 +253,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: responsiveScale(32),
     paddingTop: responsiveScale(28),
     paddingHorizontal: responsiveScale(24),
-    paddingBottom: responsiveScale(24),
+    paddingBottom: responsiveScale(40),
   },
   title: {
     fontSize: responsiveStyles.titleSize,

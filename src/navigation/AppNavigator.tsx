@@ -128,7 +128,12 @@ const AppNavigator: React.FC<AppNavigatorProps> = () => {
           />
         );
       case 'register':
-        return <RegisterScreen onBackToLogin={() => setCurrentScreen('login')} />;
+        return (
+          <RegisterScreen
+            onBackToLogin={() => setCurrentScreen('login')}
+            onRegisterSuccess={() => setCurrentScreen('home')}
+          />
+        );
       case 'home':
         return (
           <HomeScreen

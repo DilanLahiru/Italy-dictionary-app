@@ -86,6 +86,7 @@ export const userSlice = createSlice({
         // Handle token that might be JSON stringified
         const token = typeof action.payload.jwt === 'string' ? action.payload.jwt : JSON.stringify(action.payload.jwt);
         AsyncStorage.setItem('authToken', token);
+        AsyncStorage.setItem('userData', JSON.stringify(action.payload.user));
       });
     },
 });

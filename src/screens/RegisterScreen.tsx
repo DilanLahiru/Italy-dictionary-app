@@ -12,6 +12,8 @@ import {
   SafeAreaView,
   ScrollView,
   Image,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useAppDispatch } from '../store/hooks';
@@ -34,9 +36,10 @@ const logoImage = require('../assets/images/logo.png');
 
 interface RegisterScreenProps {
   onBackToLogin?: () => void;
+  onRegisterSuccess?: () => void;
 }
 
-const RegisterScreen: React.FC<RegisterScreenProps> = ({ onBackToLogin }) => {
+const RegisterScreen: React.FC<RegisterScreenProps> = ({ onBackToLogin, onRegisterSuccess }) => {
   const dispatch = useAppDispatch();
   const form = useRegisterForm();
 
@@ -117,7 +120,12 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ onBackToLogin }) => {
 
       if (result.type === RegisterUser.fulfilled.type) {
         form.resetForm();
-        onBackToLogin?.();
+        Toast.show({
+          type: ALERT_TYPE.SUCCESS,
+          title: 'Registration Successful',
+          textBody: 'You are now registered.',
+        });
+        onRegisterSuccess?.();
       } else {
         const message =
           typeof result.payload === 'string'
@@ -176,7 +184,16 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ onBackToLogin }) => {
         </SafeAreaView>
       </LinearGradient>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoiding}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      >
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.formCard}>
           {/* Form Section */}
           <View style={styles.formSection}>
@@ -268,6 +285,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ onBackToLogin }) => {
           </View>
         </View>
       </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 };
@@ -302,7 +320,7 @@ const styles = StyleSheet.create({
   },
   heroContent: {
     alignItems: 'center',
-    paddingTop: SPACING.lg,
+    paddingTop: SPACING.xxxl,
     paddingBottom: SPACING.xxxl,
     paddingHorizontal: SPACING.xl,
   },
@@ -328,6 +346,9 @@ const styles = StyleSheet.create({
   heroSubtitle: {
     color: 'rgba(255,255,255,0.85)',
     fontSize: FONT_SIZES.md,
+  },
+  keyboardAvoiding: {
+    flex: 1,
   },
   scrollContent: {
     paddingBottom: SPACING.xl,
