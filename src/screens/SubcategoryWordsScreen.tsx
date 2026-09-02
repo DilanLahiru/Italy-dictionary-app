@@ -89,8 +89,7 @@ const SubcategoryWordsScreen: React.FC<SubcategoryWordsScreenProps> = ({
       
       // Extract words array from response
       const allWords = Array.isArray(result?.data) ? result.data : Array.isArray(result) ? result : [];
-      
-      console.log('All words fetched:', allWords.length);
+    
       
       // Filter words that belong to this subcategory
       const wordsForSubcategory = allWords.filter((word: any) => {
@@ -107,7 +106,6 @@ const SubcategoryWordsScreen: React.FC<SubcategoryWordsScreenProps> = ({
         return false;
       });
       
-      console.log(`Filtered words for subcategory ${subcategory.name}:`, wordsForSubcategory.length);
       setFilteredWords(wordsForSubcategory);
     } catch (error) {
       console.error('Error fetching words:', error);

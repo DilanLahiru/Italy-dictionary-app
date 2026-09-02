@@ -32,9 +32,10 @@ const logoImage = require('../assets/images/logo.png');
 interface LoginScreenProps {
   onCreateAccount?: () => void;
   onSignIn?: () => void;
+  onForgotPassword?: () => void;
 }
 
-const LoginScreen: React.FC<LoginScreenProps> = ({ onCreateAccount, onSignIn }) => {
+const LoginScreen: React.FC<LoginScreenProps> = ({ onCreateAccount, onSignIn, onForgotPassword }) => {
   const dispatch = useAppDispatch();
   const form = useLoginForm();
 
@@ -139,8 +140,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onCreateAccount, onSignIn }) 
   };
 
   const handleForgotPassword = () => {
-    // TODO: Navigate to forgot password screen
-    console.log('Forgot password not implemented yet');
+    onForgotPassword?.();
   };
 
   return (

@@ -2,6 +2,18 @@
  * Layout and dimension constants
  */
 
+import { Dimensions } from "react-native";
+
+// Get Device Dimensions from using device's window size
+const { width, height } = Dimensions.get('window');
+
+export const DEVICE_WIDTH = width;
+export const DEVICE_HEIGHT = height;
+
+// Height of the HomeScreen hero banner image, shared so overlay elements
+// (e.g. LanguageSelector) can be pinned to its bottom edge consistently.
+export const IMAGE_HEIGHT = DEVICE_HEIGHT * 0.35;
+
 export const SPACING = {
   EXTRA_SMALL: 4,
   SMALL: 8,

@@ -70,12 +70,6 @@ const FAVORITES_STORAGE_KEY = '@italian_word_teacher_favorites';
 const getWordText = (word: FavoriteWord): string => {
   // Use name or Italy_word (they should both have the same value now)
   const text = word.name || word.Italy_word || 'Unknown Word';
-  console.log('FavoritesScreen getWordText:', { 
-    id: word.id,
-    name: word.name,
-    Italy_word: word.Italy_word,
-    result: text 
-  });
   return text;
 };
 
@@ -130,7 +124,6 @@ const FavoritesScreen: React.FC<FavoritesScreenProps> = ({
 
       if (storedFavorites) {
         const parsedFavorites = JSON.parse(storedFavorites);
-        console.log(parsedFavorites);
         setFavorites(
           Array.isArray(parsedFavorites) ? parsedFavorites : [],
         );
@@ -157,10 +150,6 @@ const FavoritesScreen: React.FC<FavoritesScreenProps> = ({
     loadFavorites();
     loadUserInitial();
   }, [loadFavorites, loadUserInitial]);
-
-  console.log('====================================');
-  console.log(favorites);
-  console.log('====================================');
 
   /**
    * Handle tab navigation

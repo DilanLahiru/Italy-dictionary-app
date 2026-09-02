@@ -14,6 +14,7 @@ const dictionary = require('../assets/images/dictionary.png');
 const BannerImage = require('../assets/images/italy_scene.png');
 const deleteImage = require('../assets/images/delete.png');
 const backImage = require('../assets/images/left.png');
+const copyImage = require('../assets/images/copy.png');
 
 export const LANGUAGES = ['Italy', 'Sinhala', 'English'];
 
@@ -40,4 +41,5 @@ export const ASSETS = {
   BannerImage,
   deleteImage,
   backImage,
+  copyImage,
 };

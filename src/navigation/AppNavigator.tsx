@@ -9,6 +9,8 @@ import SplashScreen from '../screens/SplashScreen';
 import WelcomeScreen from '../screens/WelcomeScreen';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
+import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
+import ResetPasswordScreen from '../screens/ResetPasswordScreen';
 import HomeScreen from '../screens/HomeScreen';
 import HouseCategoryScreen from '../screens/HouseCategoryScreen';
 import CategoryDetailScreen from '../screens/CategoryDetailScreen';
@@ -30,6 +32,8 @@ export type ScreenName =
   | 'welcome'
   | 'login'
   | 'register'
+  | 'forgotPassword'
+  | 'resetPassword'
   | 'home'
   | 'atoz'
   | 'house'
@@ -53,6 +57,7 @@ interface NavigationParams {
   subcategory?: any;
   subcategoryName?: string;
   words?: any[];
+  resetEmail?: string;
 }
 
 const USER_STORAGE_KEY = 'rememberMe_email';
@@ -125,6 +130,7 @@ const AppNavigator: React.FC<AppNavigatorProps> = () => {
           <LoginScreen
             onCreateAccount={() => setCurrentScreen('register')}
             onSignIn={() => setCurrentScreen('home')}
+            onForgotPassword={() => setCurrentScreen('forgotPassword')}
           />
         );
       case 'register':
@@ -132,6 +138,30 @@ const AppNavigator: React.FC<AppNavigatorProps> = () => {
           <RegisterScreen
             onBackToLogin={() => setCurrentScreen('login')}
             onRegisterSuccess={() => setCurrentScreen('home')}
+          />
+        );
+      case 'forgotPassword':
+        return (
+          <ForgotPasswordScreen
+            onBackToLogin={() => setCurrentScreen('login')}
+            onCodeSent={(resetEmail) => {
+              setNavParams({ ...navParams, resetEmail });
+              setCurrentScreen('resetPassword');
+            }}
+          />
+        );
+      case 'resetPassword':
+        return (
+          <ResetPasswordScreen
+            email={navParams.resetEmail}
+            onBackToLogin={() => {
+              setNavParams({});
+              setCurrentScreen('login');
+            }}
+            onPasswordUpdated={() => {
+              setNavParams({});
+              setCurrentScreen('login');
+            }}
           />
         );
       case 'home':

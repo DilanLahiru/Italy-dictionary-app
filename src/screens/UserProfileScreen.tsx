@@ -39,7 +39,6 @@ export default function UserProfileScreen({onBack, onLogout}: Props) {
   const handleLoadUserData = async () => {
     try {
       const userData = await AsyncStorage.getItem('userData');
-      console.log(userData);
       if (userData) {
         const user = JSON.parse(userData);
         setName(user.username);
@@ -120,7 +119,6 @@ export default function UserProfileScreen({onBack, onLogout}: Props) {
         password,
         passwordConfirmation,
       })).unwrap();
-      console.log('Password update response:', response);
       
       // Clear user data and logout
       await AsyncStorage.removeItem('authToken');
@@ -142,7 +140,6 @@ export default function UserProfileScreen({onBack, onLogout}: Props) {
         },
       });
     } catch (error: any) {
-      console.log('Error updating password:', error);
       const errorMessage = error?.message || 'Failed to update password. Please try again.';
       Dialog.show({
         type: ALERT_TYPE.DANGER,
@@ -182,7 +179,7 @@ export default function UserProfileScreen({onBack, onLogout}: Props) {
             keyboardType="email-address"
           />
 
-          <Text style={styles.label}>Current Password</Text>
+          {/* <Text style={styles.label}>Current Password</Text>
           <TextInput
             value={currentPassword}
             onChangeText={setCurrentPassword}
@@ -223,7 +220,7 @@ export default function UserProfileScreen({onBack, onLogout}: Props) {
             ) : (
               <Text style={styles.updateText}>Update Password</Text>
             )}
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </ScrollView>
       </SafeAreaView>
     </LinearGradient>

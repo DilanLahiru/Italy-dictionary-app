@@ -22,7 +22,7 @@ import LanguageSelector from '../components/LanguageSelector';
 import SearchSection from '../components/SearchSection';
 import TabBar from '../components/TabBar';
 import NotificationModal from './NotificationModal';
-import {SPACING, FONT_SIZES, FONT_WEIGHTS} from '../constants/dimensions';
+import {SPACING, FONT_SIZES, FONT_WEIGHTS, DEVICE_HEIGHT, DEVICE_WIDTH, IMAGE_HEIGHT} from '../constants/dimensions';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {getCategories} from '../features/words/wordSlice';
 import {useAppDispatch, useAppSelector} from '../store/hooks';
@@ -52,6 +52,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   const dispatch = useAppDispatch();
   const {categories} = useAppSelector(state => state.word);
   const [userInitial, setUserInitial] = useState('U');
+  const [languageSelectorHeight, setLanguageSelectorHeight] = useState(0);
 
   const handleLoadUserData = useCallback(async () => {
     try {
@@ -73,10 +74,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       const savedEmail = await AsyncStorage.getItem('rememberMe_email');
       const savedPassword = await AsyncStorage.getItem('rememberMe_password');
 
-      console.log('====================================');
-      console.log(savedEmail);
-      console.log(savedPassword);
-      console.log('====================================');
     } catch (error) {
       console.error('Error loading saved credentials:', error);
     }
@@ -97,9 +94,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   }, [handleLoadCategories, handleLoadCredentials, handleLoadUserData]);
 
   const handleCategoryPress = (categoryId: string | number, cat: any) => {
-    console.log('====================================');
-    console.log('category press :', cat);
-    console.log('====================================');
     // Handle static AtoZ category
     if (categoryId === 'atoz') {
       onOpenAZ?.();
@@ -109,7 +103,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     // Handle dynamic backend categories
     const category = categories?.find(c => c.id === categoryId);
     if (!category) {
-      console.log(`Category with ID ${categoryId} not found`);
       return;
     }
 
@@ -191,13 +184,23 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
               </View>
             </View>
 
-            <Text style={styles.title}>{`Italy Go
-Dictionary`}</Text>
+            <View
+              style={{
+                width: '100%',
+                //backgroundColor: 'red',
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+                marginTop: DEVICE_HEIGHT * 0.02,
+              }}>
+              <Text style={styles.title}>{`Italy Go`}</Text>
+              <Text style={styles.flagText}>🇮🇹</Text>
+            </View>
 
             <View style={styles.badgeRow}>
-              <View style={styles.flagBadge}>
+              {/* <View style={styles.flagBadge}>
                 <Text style={styles.flagText}>🇮🇹</Text>
-              </View>
+              </View> */}
               <Text style={styles.subtitle}>Learn Italian with Confidence</Text>
             </View>
 
@@ -207,14 +210,29 @@ Dictionary`}</Text>
               onSearch={screen.handleSearch}
             />
 
-            <LanguageSelector
-              languages={LANGUAGES}
-              selectedLanguage={screen.selectedLanguage}
-              onLanguageChange={screen.setSelectedLanguage}
-            />
-            <View style={styles.categoriesHeader}>
+            <View
+              style={[
+                styles.languageSelectorWrapper,
+                {top: IMAGE_HEIGHT - languageSelectorHeight / 2},
+              ]}
+              onLayout={event =>
+                setLanguageSelectorHeight(event.nativeEvent.layout.height)
+              }>
+              <LanguageSelector
+                languages={LANGUAGES}
+                selectedLanguage={screen.selectedLanguage}
+                onLanguageChange={screen.setSelectedLanguage}
+              />
+            </View>
+            <View
+              style={[
+                styles.categoriesHeader,
+                // {marginTop: languageSelectorHeight / 0.9 + SPACING.XXL},
+              ]}>
               <Text style={styles.sectionTitle}>Explore Categories</Text>
-              <TouchableOpacity onPress={onOpenAllCategories} activeOpacity={0.8}>
+              <TouchableOpacity
+                onPress={onOpenAllCategories}
+                activeOpacity={0.8}>
                 <Text style={styles.viewAll}>View all</Text>
               </TouchableOpacity>
             </View>
@@ -231,14 +249,18 @@ Dictionary`}</Text>
                   icon={item.icon}
                   label={item.name}
                   cardColor={item.kind === 'special' ? '#F4F9FF' : '#FFFFFF'}
-                  iconBackgroundColor={item.kind === 'special' ? '#DCEEFF' : '#F2F6FA'}
+                  iconBackgroundColor={
+                    item.kind === 'special' ? '#DCEEFF' : '#F2F6FA'
+                  }
                   onPress={() => {
                     if (item.id === 'atoz') {
                       handleCategoryPress('atoz', null);
                       return;
                     }
 
-                    const foundCategory = categories?.find(category => category.id === item.id);
+                    const foundCategory = categories?.find(
+                      category => category.id === item.id,
+                    );
                     if (foundCategory) {
                       handleCategoryPress(foundCategory.id, foundCategory);
                     }
@@ -269,9 +291,15 @@ const styles = StyleSheet.create({
   },
   backgroundImage: {
     width: '100%',
-    height: 300, // Adjust the height as needed
+    height: IMAGE_HEIGHT,
     resizeMode: 'cover',
     position: 'absolute',
+  },
+  languageSelectorWrapper: {
+    position: 'absolute',
+    left: 18,
+    right: 18,
+    zIndex: 10,
   },
   overlay: {
     flex: 1,
@@ -306,16 +334,20 @@ const styles = StyleSheet.create({
     fontWeight: FONT_WEIGHTS.bold,
   },
   title: {
-    fontSize: 34,
+    fontSize: 40,
     lineHeight: 40,
     color: '#0B2240',
     fontWeight: FONT_WEIGHTS.EXTRA_BOLD,
     marginBottom: SPACING.xs,
+    textAlign: 'center',
   },
   badgeRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: SPACING.sm,
+    width: '90%',
+    //backgroundColor: 'red',
+    justifyContent: 'center',
   },
   flagBadge: {
     width: 22,
@@ -327,12 +359,17 @@ const styles = StyleSheet.create({
     marginRight: SPACING.sm,
   },
   flagText: {
-    fontSize: 18,
+    fontSize: 20,
+    marginLeft: SPACING.md,
+    marginTop: -20,
+    color: '#ffffff',
   },
   subtitle: {
     fontSize: FONT_SIZES.md,
     color: '#1A2D39',
     fontWeight: FONT_WEIGHTS.BOLD,
+    textAlign: 'center',
+    marginLeft: SPACING.xxxl,
   },
   headerRight: {
     flexDirection: 'row',
@@ -366,9 +403,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: SPACING.XXL,
+    marginTop: DEVICE_HEIGHT * 0.13,
     marginBottom: SPACING.md,
     paddingHorizontal: SPACING.sm,
+    width: DEVICE_WIDTH * 0.9,
   },
   sectionTitle: {
     fontSize: 16,
@@ -384,7 +422,7 @@ const styles = StyleSheet.create({
     paddingBottom: SPACING.xl,
   },
   listRow: {
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
     marginBottom: 12,
   },
 });

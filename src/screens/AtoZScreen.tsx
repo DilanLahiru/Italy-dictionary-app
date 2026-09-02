@@ -48,7 +48,6 @@ const getWordText = (word: any): string => {
     word.word ||
     word.name ||
     JSON.stringify(word);
-  console.log('AtoZScreen getWordText:', {input: word, result: text});
   return text;
 };
 
@@ -87,7 +86,6 @@ const groupWordsByLetter = (words: Word[]): Record<string, Word[]> => {
     const wordText = getWordText(word);
 
     if (!wordText || wordText.length === 0) {
-      console.warn('Empty word found:', word);
       return;
     }
 
@@ -95,7 +93,6 @@ const groupWordsByLetter = (words: Word[]): Record<string, Word[]> => {
 
     // Only include valid letters
     if (!/[A-Z]/.test(firstLetter)) {
-      console.warn('Invalid first letter:', firstLetter, 'for word:', wordText);
       return;
     }
 
@@ -134,7 +131,6 @@ export default function AtoZScreen({onBack}: Props) {
       if (favoritesJson) {
         const loadedFavorites = JSON.parse(favoritesJson);
         setFavorites(Array.isArray(loadedFavorites) ? loadedFavorites : []);
-        console.log('Loaded favorites:', loadedFavorites);
       }
     } catch (error) {
       console.error('Error loading favorites:', error);
@@ -148,7 +144,6 @@ export default function AtoZScreen({onBack}: Props) {
         FAVORITES_STORAGE_KEY,
         JSON.stringify(newFavorites),
       );
-      console.log('Saved favorites:', newFavorites);
     } catch (error) {
       console.error('Error saving favorites:', error);
     }
@@ -165,7 +160,6 @@ export default function AtoZScreen({onBack}: Props) {
   // Toggle favorite
   const toggleFavorite = useCallback(
     (wordId: string, wordName: string, fullWord: any) => {
-      console.log('toggleFavorite called:', {wordId, wordName, fullWord});
 
       setFavorites(prev => {
         let newFavorites: FavoriteWord[];
@@ -176,7 +170,6 @@ export default function AtoZScreen({onBack}: Props) {
         } else {
           // Add to favorites - save the complete word object
           const wordText = getWordText(fullWord);
-          console.log('Creating favorite with text:', wordText);
 
           const favoriteWord: FavoriteWord = {
             id: getWordId(fullWord),
@@ -192,7 +185,6 @@ export default function AtoZScreen({onBack}: Props) {
             publishedAt: fullWord.publishedAt,
             updatedAt: fullWord.updatedAt,
           };
-          console.log('Saving favorite:', favoriteWord);
           newFavorites = [...prev, favoriteWord];
         }
 
@@ -210,8 +202,6 @@ export default function AtoZScreen({onBack}: Props) {
       setError(null);
 
       const result = await dispatch(getAllWords() as any).unwrap();
-
-      console.log('Raw API result:', result);
 
       // Extract words from API response - try multiple possible structures
       let allWords: Word[] = [];
@@ -232,33 +222,20 @@ export default function AtoZScreen({onBack}: Props) {
         }
       }
 
-      console.log('Extracted words:', allWords);
-      console.log('Total words count:', allWords.length);
-
       if (allWords.length === 0) {
         setError('No vocabulary found');
         return;
       }
 
-      // Log first word structure to help debug
-      if (allWords.length > 0) {
-        console.log('Sample word structure:', allWords[0]);
-        console.log('Word properties:', Object.keys(allWords[0]));
-      }
-
       // Group words by first letter
       const grouped = groupWordsByLetter(allWords);
-      console.log('Grouped words:', grouped);
-      console.log('Letters with words:', Object.keys(grouped));
 
       setGroupedWords(grouped);
 
       // Auto-expand the first available letter
       const firstLetter = Object.keys(grouped).sort()[0];
-      console.log('Auto-expanding letter:', firstLetter);
       setExpanded(firstLetter || null);
     } catch (err) {
-      console.error('Error fetching words:', err);
       setError('Failed to load vocabulary: ' + (err as Error).message);
     } finally {
       setLoading(false);

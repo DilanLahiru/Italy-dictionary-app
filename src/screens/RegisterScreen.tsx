@@ -29,7 +29,7 @@ import FormInput from '../components/FormInput';
 import PrimaryButton from '../components/PrimaryButton';
 import TermsCheckbox from '../components/TermsCheckbox';
 import { COLORS } from '../constants/colors';
-import { SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../constants/dimensions';
+import { SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS, DEVICE_HEIGHT } from '../constants/dimensions';
 import { ALERT_TYPE, Dialog, Toast } from 'react-native-alert-notification';
 
 const logoImage = require('../assets/images/logo.png');
@@ -351,7 +351,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: SPACING.xl,
+    paddingBottom: DEVICE_HEIGHT * 0.1,
   },
   formCard: {
     backgroundColor: COLORS.backgroundWhite,

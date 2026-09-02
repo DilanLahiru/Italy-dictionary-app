@@ -116,9 +116,6 @@ const SearchResultsScreen: React.FC<SearchResultsScreenProps> = ({
   };
 
   const getWordText = (word: any): string => {
-    console.log('====================================');
-    console.log(word);
-    console.log('====================================');
     return word.Italy_word || word.italian || word.word || 'Unknown';
   };
 

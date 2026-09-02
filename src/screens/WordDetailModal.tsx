@@ -19,6 +19,7 @@ import { COLORS } from '../constants/colors';
 import { SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../constants/dimensions';
 import { WordDetailModalProps, ModalPosition, WordDetail } from '../types/word';
 import { initializeTTS, speakText } from '../services/ttsService';
+import { ASSETS } from '../constants/homeConstants';
 
 /**
  * Component for displaying detailed word information in a modal
@@ -85,8 +86,19 @@ const WordDetailModal: React.FC<WordDetailModalProps> = ({
 
   const getImageUri = (): string | undefined => {
     if (!details) return undefined;
+
     const basePath = 'https://italygoadmin.com';
-    return details.image ? `${basePath}${details.image}` : `${basePath}${details.imageUrl}`;
+    // Shape 1: word list response -> details.imageUrl (relative path)
+    // Shape 2: word detail response -> details.Image[0].url (relative path)
+    const rawPath =
+      details.imageUrl ||
+      (Array.isArray(details.Image) && details.Image.length > 0
+        ? details.Image[0].url
+        : undefined);
+
+    if (!rawPath) return undefined;
+
+    return rawPath.startsWith('http') ? rawPath : `${basePath}${rawPath}`;
   };
 
   const renderSpeakButton = (
@@ -278,7 +290,7 @@ const TranslationBlock: React.FC<TranslationBlockProps> = ({
           style={styles.copyButton}
           activeOpacity={0.7}
         >
-          <Text style={styles.iconSmall}>📋</Text>
+          <Image source={ASSETS.copyImage} style={styles.copyIcon} />
         </TouchableOpacity>
       </View>
     </View>
@@ -431,6 +443,10 @@ const styles = StyleSheet.create({
   iconSmall: {
     fontSize: FONT_SIZES.EXTRA_LARGE,
     color: COLORS.textDark,
+  },
+  copyIcon: {
+    width: 25,
+    height: 25,
   },
 });
 

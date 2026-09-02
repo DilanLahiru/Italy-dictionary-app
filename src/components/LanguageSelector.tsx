@@ -6,7 +6,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { COLORS } from '../constants/colors';
-import { SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS } from '../constants/dimensions';
+import { SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS, DEVICE_HEIGHT } from '../constants/dimensions';
 
 interface LanguageSelectorProps {
   languages: string[];
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     marginBottom: SPACING.md,
-    marginTop: SPACING.MEDIUM,
+    marginTop: DEVICE_HEIGHT * 0.035,
   },
   button: {
     flex: 1,

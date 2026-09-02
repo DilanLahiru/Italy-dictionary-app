@@ -28,9 +28,9 @@ const SearchSection: React.FC<SearchSectionProps> = ({
   return (
     <View style={styles.container}>
       <View style={styles.searchField}>
-        <View style={styles.iconWrapper} pointerEvents="none">
+        {/* <View style={styles.iconWrapper} pointerEvents="none">
           <Text style={styles.searchIcon}>⌕</Text>
-        </View>
+        </View> */}
 
         <TextInput
           style={styles.input}
@@ -51,7 +51,7 @@ const SearchSection: React.FC<SearchSectionProps> = ({
           onPress={handleSubmit}
           activeOpacity={0.85}
         >
-          <Text style={styles.actionIcon}>◉</Text>
+          <Text style={styles.actionIcon}>⌕</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -60,14 +60,14 @@ const SearchSection: React.FC<SearchSectionProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: SPACING.xxxl * 0.8,
+    marginTop: 10,
     marginBottom: SPACING.sm,
   },
   searchField: {
     flexDirection: 'row',
     alignItems: 'center',
-    height: 56,
-    backgroundColor: '#3494F5',
+    height: 50,
+    backgroundColor: '#000080',
     borderRadius: 28,
     paddingHorizontal: SPACING.md,
     shadowColor: '#1D4F9A',
@@ -95,6 +95,7 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.md,
     paddingVertical: 0,
     includeFontPadding: false,
+    marginLeft: SPACING.sm,
   },
   actionButton: {
     width: 34,
@@ -107,7 +108,7 @@ const styles = StyleSheet.create({
   },
   actionIcon: {
     color: COLORS.backgroundWhite,
-    fontSize: 17,
+    fontSize: 22,
     fontWeight: FONT_WEIGHTS.bold,
     //lineHeight: 17,
   },

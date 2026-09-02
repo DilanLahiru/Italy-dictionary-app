@@ -74,7 +74,6 @@ export default function HouseCategoryScreen({ onBack }: HouseCategoryScreenProps
       setCategories(categoryList);
       setWords(groupedWords);
     } catch (err) {
-      console.error('Error fetching house words:', err);
       setError('Failed to load vocabulary. Using fallback data.');
       setCategories(getFallbackCategories());
       //setWords(getFallbackWords());

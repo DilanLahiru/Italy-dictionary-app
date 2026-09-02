@@ -52,3 +52,11 @@ export const validatePasswordMatch = (password: string, confirmPassword: string)
   return undefined;
 };
 
+export const validateResetCode = (code: string): string | undefined => {
+  if (!code.trim()) {
+    return 'Reset code is required';
+  }
+
+  return undefined;
+};
+

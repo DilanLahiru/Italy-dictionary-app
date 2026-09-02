@@ -54,6 +54,8 @@ export const API_ENDPOINTS = {
     SIGN_IN: 'api/auth/local',
     SIGN_UP: 'api/auth/local/register',
     REFRESH: 'api/auth/refresh',
+    FORGOT_PASSWORD: 'api/auth/forgot-password',
+    RESET_PASSWORD: 'api/auth/reset-password',
   },
   WORDS: {
     //GET_ALL: 'api/words',

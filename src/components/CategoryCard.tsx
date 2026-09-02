@@ -65,6 +65,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
     shadowColor: '#0F172A',
     shadowOffset: { width: 0, height: 6 },
+    marginTop: 20,
     shadowOpacity: 0.06,
     shadowRadius: 10,
     elevation: 3,

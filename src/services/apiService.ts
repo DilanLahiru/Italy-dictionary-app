@@ -187,6 +187,24 @@ export const authAPI = {
       username,
     });
   },
+
+  /**
+   * Request a password reset code to be sent to the user's email
+   */
+  forgotPassword: async (email: string) => {
+    return apiService.post(API_ENDPOINTS.AUTH.FORGOT_PASSWORD, { email });
+  },
+
+  /**
+   * Reset password using the code sent to the user's email
+   */
+  resetPassword: async (code: string, password: string, passwordConfirmation: string) => {
+    return apiService.post(API_ENDPOINTS.AUTH.RESET_PASSWORD, {
+      code,
+      password,
+      passwordConfirmation,
+    });
+  },
 };
 
 /**

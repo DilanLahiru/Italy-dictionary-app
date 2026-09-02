@@ -26,6 +26,7 @@ export interface WordDetail extends Word {
   Sinhala_word?: string;
   English_word?: string;
   image?: string;
+  Image?: Array<{ url: string }>;
   synonyms?: string[];
   antonyms?: string[];
   usageNotes?: string;

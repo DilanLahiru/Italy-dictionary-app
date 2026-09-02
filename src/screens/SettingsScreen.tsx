@@ -171,8 +171,6 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
       // Remove auth token if present
       await AsyncStorage.removeItem('authToken');
       
-      console.log('User logged out successfully');
-      
       // Navigate to splash screen
       onLogout?.();
     } catch (error) {

@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
   },
   checkmark: {
     color: COLORS.backgroundWhite,
-    fontSize: FONT_SIZES.md,
+    fontSize: FONT_SIZES.EXTRA_SMALL,
     fontWeight: FONT_WEIGHTS.bold,
   },
   textContainer: {
